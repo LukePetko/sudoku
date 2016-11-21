@@ -1,5 +1,9 @@
 from tkinter import *
+import os # na vymazanie súboru po dokončení ak nejaký jestvuje
 
+load_bool = False
+
+# UDALOSTI V SUDOKU
 def miesto(event):
 	global x, y
 	x = event.x // 40
@@ -19,6 +23,8 @@ def vymazanie(event):
 		riadky[y][x] = "0"
 		g.create_rectangle(x * 40 + 3, y * 40 + 3, x * 40 + 37, y * 40 + 37, fill = "white", outline = "")
 
+
+# KONTROLA
 def kontrola():
 	global error_boolean
 	error_boolean = False
@@ -66,18 +72,23 @@ def kontrola():
 	plocha_2 = Tk()
 	Label(plocha_2, text = txt).pack()
 
+
+# SPÚŠŤANIE
 def su0():
 	global su
 	su = "sudoku/sudoku_00"
+
 def su1():
 	global su
 	su = "sudoku/sudoku_01"
+
 def ries():
 	global su
 	if e.get() != "":
 		su = "sudoku/" + e.get()
 	if su != "":
 		preplocha.destroy()
+
 def nahlad():
 	global riadky, su
 	if e.get() != "":
@@ -111,6 +122,8 @@ def nahlad():
 				else:
 					continue
 
+
+# UKLADANIE
 def save():
 	global save_e, save_plocha
 	save_plocha = Tk()
@@ -132,27 +145,57 @@ def save_file():
 				save_riadky[i] += riadky[i][j]
 			save_sub.write(save_riadky[i])
 			save_sub.write("\n")
+		save_sub.write("{}".format(su))
 		save_sub.close()
 		save_plocha.destroy()
 		plocha.destroy()
+
+
+# NAČÍTAVANIE
+def load():
+	global load_e, load_plocha
+	load_plocha = Tk()
+	Label(load_plocha, text = "Napíš názov uloženého súboru: ").grid(row = 0, column = 0)
+	load_e = Entry(load_plocha)
+	load_e.grid(row = 0, column = 1)
+	Label(load_plocha, text = ".txt").grid(row = 0, column = 2)
+	Button(load_plocha, text = "Hraj!", command = load_file).grid(row = 1, column = 0, sticky = W)
+
+def load_file():
+	global load_bool, load_riadky
+	if load_e.get() != "":
+		load_bool = True
+		load_sub = open("saves/{}.txt".format(load_e.get()), "r")
+		load_riadky = load_sub.readlines()
+		load_plocha.destroy()
+		preplocha.destroy()
+
+
+# MENU
 preplocha = Tk()
 b1 = Radiobutton(preplocha, text = "Sudoku 1", value = 0, command = su0).grid(row = 0, column = 0, sticky = W)
 b2 = Radiobutton(preplocha, text = "Sudoku 2", value = 1, command = su1).grid(row = 1, column = 0, sticky = W)
 e = Entry()
 e.grid(row = 2, column = 0)
 button_1 = Button(preplocha, text = "Rieš", command = ries).grid(row = 3, column = 0, sticky = W)
-button_2 = Button(preplocha, text = "Náhlad", command = nahlad).grid(row = 3, column = 0, sticky = W, padx = 60)
+button_2 = Button(preplocha, text = "Náhlad", command = nahlad).grid(row = 3, column = 0, sticky = W, padx = 52)
+button_3 = Button(preplocha, text = "Načítaj", command = load).grid(row = 3, column = 0, sticky = E)
 preplocha.mainloop()
 
-sub = open("{}.txt".format(su), "r")
+
+# ČÍTANIE
+if load_bool == False:
+	sub = open("{}.txt".format(su), "r")
+elif load_bool == True:
+	sub = open("{}.txt".format(load_riadky[9]), "r")
+	su = load_riadky[9]
 riadky = sub.readlines()
 pov_riadky = list()
 print(pov_riadky)
 for i in range(len(riadky)):
 	riadky[i] = riadky[i].strip()
 	pov_riadky.append(riadky[i])
-	# riadky[i] = list(riadky[i])
-
+	riadky[i] = list(riadky[i])
 plocha = Tk()
 
 g = Canvas(plocha, width = 360, height = 360, bg = "white")
@@ -177,5 +220,16 @@ for i in range(len(riadky)):
 			g.create_text(i * 40 + 20, j * 40 + 20, text = riadky[j][i], fill = "blue", font = ("Times New Roman", 30))
 		else:
 			continue
+
+if load_bool == True:
+	for i in range(9):
+		for j in range(9):
+			if load_riadky[j][i] != "0" and riadky[j][i] == "0":
+				g.create_text(i * 40 + 20, j * 40 + 20, text = load_riadky[j][i], fill = "black", font = ("Times New Roman", 30))
+			else:
+				continue
+	for i in range(len(riadky)):
+		load_riadky[i] = load_riadky[i].strip()
+		riadky[i] = list(load_riadky[i])
 
 mainloop()
