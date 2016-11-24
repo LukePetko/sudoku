@@ -1,14 +1,17 @@
 from tkinter import *
 import os # na vymazanie súboru po dokončení ak nejaký jestvuje
+import platform
 
 load_bool = False
 
+
+
 # UDALOSTI V SUDOKU
+
 def miesto(event):
 	global x, y
 	x = event.x // 40
 	y = event.y // 40
-	print(y, x, riadky[y][x], pov_riadky[y][x])
 
 def stlacenie(event):
 	if pov_riadky[y][x] == "0" and event.char in "123456789":
@@ -24,13 +27,17 @@ def vymazanie(event):
 		g.create_rectangle(x * 40 + 3, y * 40 + 3, x * 40 + 37, y * 40 + 37, fill = "white", outline = "")
 
 
+
 # KONTROLA
+
 def kontrola():
 	global error_boolean
 	error_boolean = False
 	kontrolne_riadky_x = 9 * [""]
 	kontrolne_riadky_y = 9 * [""]
 	kontrolne_riadky_kocky = 9 * [""]
+
+
 
 # test na číslo 0
 
@@ -63,24 +70,23 @@ def kontrola():
 				if kontrolne_riadky_x[i].find(str(j)) == -1 or kontrolne_riadky_y[i].find(str(j)) == -1 or kontrolne_riadky_kocky[i].find(str(j)) == -1:
 					error_boolean = True
 					break
-		print(error_boolean)
 
 	if error_boolean == True:
 		txt = "Máš to zle, veľa šťastia nabudúce!"
 	else:
 		txt = "Gratulujem! Si najlepší"
+		if load_bool == True:
+			os.remove(load_sub_name)
 	plocha_2 = Tk()
 	Label(plocha_2, text = txt).pack()
 
 
-# SPÚŠŤANIE
-def su0():
-	global su
-	su = "sudoku/sudoku_00"
 
-def su1():
+# SPÚŠŤANIE
+
+def sudoku_choise(num):
 	global su
-	su = "sudoku/sudoku_01"
+	su = "sudoku/sudoku_" + num
 
 def ries():
 	global su
@@ -97,7 +103,6 @@ def nahlad():
 		sub = open("{}.txt".format(su), "r")
 		riadky = sub.readlines()
 		pov_riadky = list()
-		print(pov_riadky)
 		for i in range(len(riadky)):
 			riadky[i] = riadky[i].strip()
 			pov_riadky.append(riadky[i])
@@ -115,7 +120,6 @@ def nahlad():
 
 
 		for i in range(len(riadky)):
-			print(su)
 			for j in range(len(riadky[i])):
 				if riadky[j][i] != "0":
 					g.create_text(i * 40 + 20, j * 40 + 20, text = riadky[j][i], fill = "blue", font = ("Times New Roman", 30))
@@ -123,7 +127,9 @@ def nahlad():
 					continue
 
 
+
 # UKLADANIE
+
 def save():
 	global save_e, save_plocha
 	save_plocha = Tk()
@@ -151,7 +157,9 @@ def save_file():
 		plocha.destroy()
 
 
+
 # NAČÍTAVANIE
+
 def load():
 	global load_e, load_plocha
 	load_plocha = Tk()
@@ -162,24 +170,41 @@ def load():
 	Button(load_plocha, text = "Hraj!", command = load_file).grid(row = 1, column = 0, sticky = W)
 
 def load_file():
-	global load_bool, load_riadky
+	global load_bool, load_riadky, load_sub_name
 	if load_e.get() != "":
 		load_bool = True
+		load_sub_name = "saves/" + load_e.get() + ".txt"
 		load_sub = open("saves/{}.txt".format(load_e.get()), "r")
 		load_riadky = load_sub.readlines()
 		load_plocha.destroy()
 		preplocha.destroy()
 
 
+# FARBY
+
+def zmena_farieb():
+	color_plocha = Tk()
+	Label(color_plocha, text = "Zmena farieb!").grid(row = 0, column = 0, sticky = W)
+
 # MENU
+
 preplocha = Tk()
-b1 = Radiobutton(preplocha, text = "Sudoku 1", value = 0, command = su0).grid(row = 0, column = 0, sticky = W)
-b2 = Radiobutton(preplocha, text = "Sudoku 2", value = 1, command = su1).grid(row = 1, column = 0, sticky = W)
+b1 = Radiobutton(preplocha, text = "Sudoku 1", value = 0, command = lambda: sudoku_choise("00")).grid(row = 0, column = 0, sticky = W)
+b2 = Radiobutton(preplocha, text = "Sudoku 2", value = 1, command = lambda: sudoku_choise("01")).grid(row = 1, column = 0, sticky = W)
 e = Entry()
 e.grid(row = 2, column = 0)
 button_1 = Button(preplocha, text = "Rieš", command = ries).grid(row = 3, column = 0, sticky = W)
 button_2 = Button(preplocha, text = "Náhlad", command = nahlad).grid(row = 3, column = 0, sticky = W, padx = 52)
-button_3 = Button(preplocha, text = "Načítaj", command = load).grid(row = 3, column = 0, sticky = E)
+# button_3  = Button(preplocha, text = "Farby", command = zmena_farieb).grid(row = 3, column = 0, sticky = E)
+
+menu = Menu(preplocha)
+
+file_menu = Menu(menu, tearoff = 0)
+file_menu.add_command(label = "Načítaj", command = load, accelerator = "Command+O")
+menu.add_cascade(label = "Súbor", menu = file_menu)
+
+preplocha.bind_all("Command-O", load)
+preplocha.config(menu = menu)
 preplocha.mainloop()
 
 
@@ -191,7 +216,6 @@ elif load_bool == True:
 	su = load_riadky[9]
 riadky = sub.readlines()
 pov_riadky = list()
-print(pov_riadky)
 for i in range(len(riadky)):
 	riadky[i] = riadky[i].strip()
 	pov_riadky.append(riadky[i])
@@ -203,8 +227,19 @@ g.pack()
 g.bind("<Button-1>", miesto)
 g.bind("<Button-2>", vymazanie)
 g.bind_all("<Key>", stlacenie)
-Button(plocha, text = "Ukonči", command = kontrola).pack(side = "left")
-Button(plocha, text = "Ulož", command = save).pack(side = "left")
+# Button(plocha, text = "Ukonči", command = kontrola).pack(side = "left")
+# Button(plocha, text = "Ulož", command = save).pack(side = "left")
+
+game_menu = Menu(plocha)
+
+game_file_menu = Menu(game_menu)
+game_file_menu.add_command(label = "Ulož", command = save, accelerator = "Command+S")
+game_file_menu.add_command(label = "Ukonči a skontroluj", command = kontrola)
+game_file_menu.add_command(label = "Ukonči bez kontroly", command = lambda: exit(), accelerator = "Command+Q")
+game_menu.add_cascade(label = "Súbor", menu = game_file_menu)
+
+plocha.config(menu = game_menu)
+plocha.bind_all("<Command-S>", save)
 
 for i in range(10):
 	for j in range(10):
