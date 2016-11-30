@@ -1,9 +1,8 @@
 from tkinter import *
-import os # na vymazanie súboru po dokončení ak nejaký jestvuje
+from os import remove # na vymazanie súboru po dokončení ak nejaký jestvuje
 import platform
 
 load_bool = False
-
 
 
 # UDALOSTI V SUDOKU
@@ -76,7 +75,7 @@ def kontrola():
 	else:
 		txt = "Gratulujem! Si najlepší"
 		if load_bool == True:
-			os.remove(load_sub_name)
+			remove(load_sub_name)
 	plocha_2 = Tk()
 	Label(plocha_2, text = txt).pack()
 
@@ -189,14 +188,14 @@ def zmena_farieb():
 # MENU
 
 preplocha = Tk()
+preplocha.title("Menu")
 b1 = Radiobutton(preplocha, text = "Sudoku 1", value = 0, command = lambda: sudoku_choise("00")).grid(row = 0, column = 0, sticky = W)
 b2 = Radiobutton(preplocha, text = "Sudoku 2", value = 1, command = lambda: sudoku_choise("01")).grid(row = 1, column = 0, sticky = W)
 e = Entry()
 e.grid(row = 2, column = 0)
 button_1 = Button(preplocha, text = "Rieš", command = ries).grid(row = 3, column = 0, sticky = W)
 button_2 = Button(preplocha, text = "Náhlad", command = nahlad).grid(row = 3, column = 0, sticky = W, padx = 52)
-# button_3  = Button(preplocha, text = "Farby", command = zmena_farieb).grid(row = 3, column = 0, sticky = E)
-
+button_3 = Button(preplocha, text = "Farby", command = zmena_farieb).grid(row = 3, column = 1, sticky = E)
 menu = Menu(preplocha)
 
 file_menu = Menu(menu, tearoff = 0)
@@ -220,13 +219,17 @@ for i in range(len(riadky)):
 	riadky[i] = riadky[i].strip()
 	pov_riadky.append(riadky[i])
 	riadky[i] = list(riadky[i])
+
+
 plocha = Tk()
+plocha.title("Sudoku")
 
 g = Canvas(plocha, width = 360, height = 360, bg = "white")
 g.pack()
 g.bind("<Button-1>", miesto)
 g.bind("<Button-2>", vymazanie)
 g.bind_all("<Key>", stlacenie)
+g.bind("<Command-s>", save)
 # Button(plocha, text = "Ukonči", command = kontrola).pack(side = "left")
 # Button(plocha, text = "Ulož", command = save).pack(side = "left")
 
@@ -234,12 +237,12 @@ game_menu = Menu(plocha)
 
 game_file_menu = Menu(game_menu)
 game_file_menu.add_command(label = "Ulož", command = save, accelerator = "Command+S")
-game_file_menu.add_command(label = "Ukonči a skontroluj", command = kontrola)
+game_file_menu.add_command(label = "Skontroluj", command = kontrola)
 game_file_menu.add_command(label = "Ukonči bez kontroly", command = lambda: exit(), accelerator = "Command+Q")
 game_menu.add_cascade(label = "Súbor", menu = game_file_menu)
 
 plocha.config(menu = game_menu)
-plocha.bind_all("<Command-S>", save)
+g.bind("<Command-s>", save)
 
 for i in range(10):
 	for j in range(10):
